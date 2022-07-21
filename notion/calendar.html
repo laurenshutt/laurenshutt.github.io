@@ -1,0 +1,82 @@
+<style>
+  #calendar {
+    margin-top:20px;
+    margin-bottom:20px;
+  }
+  p {
+    font-family: Arial, sans-serif;
+    font-size:15px;
+    color:#333;
+  }
+  .time {
+    color:#e58c88;
+    display:inline-block;
+    width:80px;
+    text-align: right;
+    font-weight:500;
+  }
+  .strike, .strike span {
+    text-decoration:line-through;
+    color:#9f9f9f;
+  }
+</style>
+<div id="calendar"></div>
+<script
+  src="https://code.jquery.com/jquery-3.6.0.min.js"
+  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+  crossorigin="anonymous"></script>
+<script>
+
+  function show(){
+
+    $("#calendar").empty();
+
+    var now = new Date().toLocaleTimeString("en-US", {"hour12": false});
+
+    jQuery.ajax({
+      crossDomain: true,
+      url: "https://script.google.com/a/vt.edu/macros/s/AKfycbw5HvjWBN5Pethar7NlMK2jHQNsFM7Qwjh13ztxSKadqKW99i0DLj0DOcR0aHTUujN9qQ/exec",
+      method: "GET",
+      dataType: "json",
+      success: function(data){
+        data.forEach(function(date){
+
+
+          function removeZeroes(str){
+            while (str.charAt(0) === "0"){
+              str = str.substring(1);
+            }
+            return str;
+          }
+
+          var start;
+
+          if (date.start.includes("AM")){
+            start = date.start;
+          } else if (date.start.includes("PM")){
+            start = parseInt(removeZeroes(date.start.split(" ")[0].split(":")[0])) + 12 + ":00:00";
+          }
+
+          console.log(start);
+          console.log(now);
+
+          var regex = new RegExp(":", "g");
+          var html;
+
+          if (!(parseInt(now.replace(regex,""), 10) < parseInt(start.replace(regex,""), 10))){
+            html = "<p class='strike'><span class='time'>" + removeZeroes(date.start.toLowerCase()) + ":</span>&nbsp;&nbsp;&nbsp;" + date.title + "</p></strike>";
+          } else {
+            html = "<p><span class='time'>" + removeZeroes(date.start.toLowerCase()) + ":</span>&nbsp;&nbsp;&nbsp;" + date.title + "</p>";
+          }
+
+          $("#calendar").append(html);
+        });
+      }
+    });
+  }
+
+  show();
+
+  setInterval(show, 1000 * 60 * 60);
+
+</script>
